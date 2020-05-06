@@ -9,6 +9,8 @@ import xzx.majia.community.community_xzx.dto.AccessTokenDto;
 import xzx.majia.community.community_xzx.dto.GithubUser;
 import xzx.majia.community.community_xzx.provider.GithubProvider;
 
+import javax.servlet.http.HttpServletRequest;
+
 @Controller
 public class AuthorizeController {
     @Autowired
@@ -23,7 +25,8 @@ public class AuthorizeController {
 
     @GetMapping("/callback")
     public String callback(@RequestParam(name = "code") String code,
-                           @RequestParam(name = "state") String state){
+                           @RequestParam(name = "state") String state,
+                           HttpServletRequest request) {
         AccessTokenDto accessTokenDto = new AccessTokenDto();
         accessTokenDto.setClient_id(clientId);
         accessTokenDto.setClient_secret(clientSecret);
@@ -32,7 +35,16 @@ public class AuthorizeController {
         accessTokenDto.setState(state);
         String accessToken = githubProvider.getAccessToken(accessTokenDto);
         GithubUser user = githubProvider.getUser(accessToken);
-        System.out.println(user.getName());
-        return "index";
+        if (user != null) {
+            //登陆成功 写session和cookie
+            request.getSession().setAttribute("user",user);
+            return "redirect:/";
+        } else {
+            //登陆失败 重新登陆
+            return "redirect:/";
+        }
+
+//        System.out.println(user.getName());
+
     }
 }
