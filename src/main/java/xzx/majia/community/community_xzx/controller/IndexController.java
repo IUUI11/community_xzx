@@ -11,19 +11,22 @@ import javax.servlet.http.HttpServletRequest;
 
 @Controller
 public class IndexController {
-    @Autowired //request = false
+    @Autowired(required = false)
     private UserMapper userMapper;
     @GetMapping("/index")
-    public String Hello(HttpServletRequest request){
-        Cookie[] cookies =  request.getCookies();
-        for (Cookie cookie:cookies){
-            if (cookie.getName().equals("token")){
-                String token = cookie.getValue();
-                User user = userMapper.findByToken(token);
-                if (user != null) {
-                    request.getSession().setAttribute("user",user);
+    public String Index(HttpServletRequest request){
+        Cookie[] cookies =  request.getCookies();//这个cookie一直取不到值 登录后的用户名显示 靠的是session不是这里的cookie
+        if (cookies != null){
+            System.out.println("cookie 不是空");
+            for (Cookie cookie:cookies){
+                if ("token".equals(cookie.getName())){
+                    String token = cookie.getValue();
+                    User user = userMapper.findByToken(token);
+                    if (user != null) {
+                        request.getSession().setAttribute("user",user);
+                    }
+                    break;
                 }
-                break;
             }
         }
 
