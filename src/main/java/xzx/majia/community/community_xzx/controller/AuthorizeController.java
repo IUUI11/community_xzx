@@ -45,7 +45,7 @@ public class AuthorizeController {
         String accessToken = githubProvider.getAccessToken(accessTokenDto);
         GithubUser githubUser = githubProvider.getUser(accessToken);
 
-        if (githubUser != null) {
+        if (githubUser != null ) {
             User user = new User();
             String token = UUID.randomUUID().toString();
             user.setToken(token);
@@ -53,9 +53,10 @@ public class AuthorizeController {
             user.setAccountId(String.valueOf(githubUser.getId()));
             user.setGmtCreate(System.currentTimeMillis());
             user.setGmtModified(user.getGmtCreate());
+            user.setAvatarUrl(githubUser.getAvatar_url());
             userMapper.insert(user);
             response.addCookie(new Cookie("token",token));//正常来说 这边加到cookie里面去 然后再从cookie里面拿出来 就行
-            request.getSession().setAttribute("user",githubUser);//但是我的不行，所以还是暂时家在session里面
+            request.getSession().setAttribute("user",githubUser);//但是我的不行，所以还是暂时在session里面
             //登陆成功 写session和cookie
             //登陆成功 写session和cookie
             System.out.println(user.getName());
