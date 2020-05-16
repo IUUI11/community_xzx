@@ -21,10 +21,9 @@ public class IndexController {
     @Autowired
     private QuestionService questionService;
 
-    @GetMapping("/index")
+    @GetMapping("/")
     public String Index(HttpServletRequest request,
-                        Model model
-        ){
+                        Model model){
         Cookie[] cookies =  request.getCookies();//这个cookie一直取不到值 登录后的用户名显示 靠的是session不是这里的cookie
         if (cookies != null){
             System.out.println("cookie 不是空");

@@ -9,6 +9,7 @@ import xzx.majia.community.community_xzx.mapper.UserMapper;
 import xzx.majia.community.community_xzx.model.Question;
 import xzx.majia.community.community_xzx.model.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -20,11 +21,14 @@ public class QuestionService {
     private QuestionMapper questionMapper;
     public List<QuestionDto> list() {
         List<Question> questions =questionMapper.list();
+        List<QuestionDto> questionDtoList = new ArrayList<>();
         for (Question question : questions) {
-           User user =  userMapper.findById(question.getCreator());
+            User user =  userMapper.findById(question.getCreator());
             QuestionDto  questionDto = new QuestionDto();
             BeanUtils.copyProperties(question,questionDto);
+            questionDto.setUser(user);
+            questionDtoList.add(questionDto);
         }
-        return null;
+        return questionDtoList;
     }
 }
