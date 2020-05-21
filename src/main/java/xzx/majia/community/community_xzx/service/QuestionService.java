@@ -3,6 +3,7 @@ package xzx.majia.community.community_xzx.service;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import xzx.majia.community.community_xzx.dto.PaginationDto;
 import xzx.majia.community.community_xzx.dto.QuestionDto;
 import xzx.majia.community.community_xzx.mapper.QuestionMapper;
 import xzx.majia.community.community_xzx.mapper.UserMapper;
@@ -19,9 +20,23 @@ public class QuestionService {
 
     @Autowired
     private QuestionMapper questionMapper;
-    public List<QuestionDto> list() {
-        List<Question> questions =questionMapper.list();
+    public PaginationDto list(Integer page, Integer size) {
+
+        PaginationDto paginationDto = new PaginationDto();
+        Integer totalCount = questionMapper.count();
+        paginationDto.setPagination(totalCount,size,page);
+        if (page < 1){
+            page =1;
+        }
+        if (page > paginationDto.getTotalPage()){
+            page =paginationDto.getTotalPage();
+        }
+
+        //size*(page-1)
+        Integer offset = size*(page-1);
+        List<Question> questions =questionMapper.list(offset,size);
         List<QuestionDto> questionDtoList = new ArrayList<>();
+
         for (Question question : questions) {
             User user =  userMapper.findById(question.getCreator());
             QuestionDto  questionDto = new QuestionDto();
@@ -29,6 +44,8 @@ public class QuestionService {
             questionDto.setUser(user);
             questionDtoList.add(questionDto);
         }
-        return questionDtoList;
+        paginationDto.setQuestions(questionDtoList);
+
+        return paginationDto;
     }
 }
