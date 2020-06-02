@@ -13,7 +13,7 @@
                     <span class="sr-only">我是一个鞋贩子</span>
 
                 </button>
-                <a class="navbar-brand" href="#">sneaker</a>
+                <a class="navbar-brand" href="/">sneaker</a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
@@ -37,7 +37,7 @@
                         <ul class="dropdown-menu">
                             <li><a href="/profile/questions">我的问题</a></li>
                             <li><a href="#">个人资料</a></li>
-                            <li><a href="#">退出登录</a></li>
+                            <li><a href="/logout">退出登录</a></li>
                         </ul>
                     </li>
                     <li th:unless="${session.user != null}">

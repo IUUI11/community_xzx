@@ -16,4 +16,11 @@ public interface UserMapper  {
 
     @Select("select * from user where id = #{id}")
     User findById(@Param("id") Integer id);
+
+    @Select("select * from user where account_id = #{account_id}")
+    User findByAccountId(String account_id);
+
+    @Select("select * from user where name = #{name}")
+    User selectByName(String name);
+
 }

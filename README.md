@@ -6,3 +6,8 @@
 [github outapp文档](ttps://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/)
 [bootstrap文档](ttps://v3.bootcss.com/getting-started/)
 ## 工具
+
+# bash
+'''
+mvn -Dmybatis.generator.overwrite=true mybatis-generator:generate
+'''
