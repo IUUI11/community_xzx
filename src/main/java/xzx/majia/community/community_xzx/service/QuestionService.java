@@ -1,5 +1,6 @@
 package xzx.majia.community.community_xzx.service;
 
+import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import xzx.majia.community.community_xzx.dto.QuestionDto;
 import xzx.majia.community.community_xzx.mapper.QuestionMapper;
 import xzx.majia.community.community_xzx.mapper.UserMapper;
 import xzx.majia.community.community_xzx.model.Question;
+import xzx.majia.community.community_xzx.model.QuestionExample;
 import xzx.majia.community.community_xzx.model.User;
 
 import java.util.ArrayList;
@@ -24,7 +26,7 @@ public class QuestionService {
 
         PaginationDto paginationDto = new PaginationDto();
         Integer totalPage;
-        Integer totalCount = questionMapper.count();
+        Integer totalCount = (int)questionMapper.countByExample(new QuestionExample());
 
         if (totalCount % size ==0){
             totalPage = totalCount / size;
@@ -42,11 +44,13 @@ public class QuestionService {
         paginationDto.setPagination(totalPage,page);
         //size*(page-1)
         Integer offset = size*(page-1);
-        List<Question> questions =questionMapper.list(offset,size);
+        /*List<Question> questions = questionMapper.list(offset,size);*/ // 没有用mybatis整合前的方法
+
+        List<Question> questions = questionMapper.selectByExampleWithRowbounds(new QuestionExample(), new RowBounds(offset, size));
         List<QuestionDto> questionDtoList = new ArrayList<>();
 
         for (Question question : questions) {
-            User user =  userMapper.findById(question.getCreator());
+            User user =  userMapper.selectByPrimaryKey(question.getCreator());
             QuestionDto  questionDto = new QuestionDto();
             BeanUtils.copyProperties(question,questionDto);
             questionDto.setUser(user);
@@ -61,7 +65,11 @@ public class QuestionService {
 
         PaginationDto paginationDto = new PaginationDto();
         Integer totalPage;
-        Integer totalCount = questionMapper.countByUserId(userId);
+      /*  Integer totalCount = questionMapper.countByUserId(userId);*/ //没有用mybatis整合前的写法
+        QuestionExample questionExample = new QuestionExample();
+        questionExample.createCriteria()
+                .andCreatorEqualTo(userId);
+        Integer totalCount = (int) questionMapper.countByExample(questionExample);
         if (totalCount % size ==0){
             totalPage = totalCount / size;
         }else {
@@ -82,11 +90,15 @@ public class QuestionService {
         if ( page == 0){
             offset = -1*page;
         }
-        List<Question> questions =questionMapper.listByUserId(userId,offset,size);
+        /*List<Question> questions =questionMapper.listByUserId(userId,offset,size);*/ //没有用mybatis整合前的写法
+        QuestionExample example =  new QuestionExample();
+        example.createCriteria()
+                .andCreatorEqualTo(userId);
+        List<Question> questions = questionMapper.selectByExampleWithRowbounds(example, new RowBounds(offset, size));
         List<QuestionDto> questionDtoList = new ArrayList<>();
 
         for (Question question : questions) {
-            User user =  userMapper.findById(question.getCreator());
+            User user =  userMapper.selectByPrimaryKey(question.getCreator());
             QuestionDto  questionDto = new QuestionDto();
             BeanUtils.copyProperties(question,questionDto);
             questionDto.setUser(user);
@@ -98,10 +110,10 @@ public class QuestionService {
     }
 
     public QuestionDto getById(Integer id) {
-        Question question  = questionMapper.getById(id);
+        Question question  = questionMapper.selectByPrimaryKey(id);
         QuestionDto questionDto = new QuestionDto();
         BeanUtils.copyProperties(question,questionDto);
-        User user =  userMapper.findById(question.getCreator());
+        User user =  userMapper.selectByPrimaryKey(question.getCreator());
         questionDto.setUser(user);
         return questionDto;
     }
@@ -111,11 +123,19 @@ public class QuestionService {
                 //创建新的问题
                 question.setGmtCreate(System.currentTimeMillis());
                 question.setGmtModified(question.getGmtCreate());
-                questionMapper.create(question);
+                questionMapper.insert(question);
             }else {
                 //更新
-                question.setGmtModified(question.getGmtCreate());
-                questionMapper.update(question);
+                /*question.setGmtModified(question.getGmtCreate());*/ //没有用mybatis整合前的写法
+                Question updateQuestion = new Question();
+                updateQuestion.setGmtModified(System.currentTimeMillis());
+                updateQuestion.setTitle(question.getTitle());
+                updateQuestion.setDescription(question.getDescription());
+                updateQuestion.setTag(question.getTag());
+                QuestionExample example = new QuestionExample();
+                example.createCriteria()
+                        .andIdEqualTo(question.getId());
+                questionMapper.updateByExampleSelective(updateQuestion, example);
             }
     }
 }

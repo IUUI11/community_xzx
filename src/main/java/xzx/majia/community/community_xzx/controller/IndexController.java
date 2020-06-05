@@ -8,10 +8,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import xzx.majia.community.community_xzx.dto.PaginationDto;
 import xzx.majia.community.community_xzx.mapper.UserMapper;
 import xzx.majia.community.community_xzx.model.User;
+import xzx.majia.community.community_xzx.model.UserExample;
 import xzx.majia.community.community_xzx.service.QuestionService;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Controller
 public class IndexController {
@@ -32,9 +34,13 @@ public class IndexController {
             for (Cookie cookie:cookies){
                 if ("token".equals(cookie.getName())){
                     String token = cookie.getValue();
-                    User user = userMapper.findByToken(token);
-                    if (user != null) {
-                        request.getSession().setAttribute("user",user);
+                    UserExample userExample = new UserExample();
+                    userExample.createCriteria()
+                            .andTokenEqualTo(token);
+                    List<User> users = userMapper.selectByExample(userExample);
+                    /*User user = userMapper.findByToken(token);*/ //集成mybatis之前用的方法
+                    if (users.size() != 0) {
+                        request.getSession().setAttribute("user",users.get(0));
                     }
                     break;
                 }
