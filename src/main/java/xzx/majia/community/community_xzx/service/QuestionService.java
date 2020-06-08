@@ -8,6 +8,7 @@ import xzx.majia.community.community_xzx.dto.PaginationDto;
 import xzx.majia.community.community_xzx.dto.QuestionDto;
 import xzx.majia.community.community_xzx.exception.CustomizeErrorCode;
 import xzx.majia.community.community_xzx.exception.CustomizeException;
+import xzx.majia.community.community_xzx.mapper.QuestionExtMapper;
 import xzx.majia.community.community_xzx.mapper.QuestionMapper;
 import xzx.majia.community.community_xzx.mapper.UserMapper;
 import xzx.majia.community.community_xzx.model.Question;
@@ -21,6 +22,9 @@ import java.util.List;
 public class QuestionService {
     @Autowired(required = false)
     private UserMapper userMapper;
+
+    @Autowired
+    private QuestionExtMapper questionExtMapper;
 
     @Autowired
     private QuestionMapper questionMapper;
@@ -145,5 +149,14 @@ public class QuestionService {
                     throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
                 }
             }
+    }
+
+    public void incView(Integer id) {
+
+        Question question = new Question();
+        question.setId(id);
+        question.setViewCount(1);
+        questionExtMapper.incView(question);
+
     }
 }
