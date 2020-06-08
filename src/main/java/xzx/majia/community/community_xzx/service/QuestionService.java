@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import xzx.majia.community.community_xzx.dto.PaginationDto;
 import xzx.majia.community.community_xzx.dto.QuestionDto;
+import xzx.majia.community.community_xzx.exception.CustomizeErrorCode;
+import xzx.majia.community.community_xzx.exception.CustomizeException;
 import xzx.majia.community.community_xzx.mapper.QuestionMapper;
 import xzx.majia.community.community_xzx.mapper.UserMapper;
 import xzx.majia.community.community_xzx.model.Question;
@@ -111,6 +113,9 @@ public class QuestionService {
 
     public QuestionDto getById(Integer id) {
         Question question  = questionMapper.selectByPrimaryKey(id);
+        if (question == null){
+            throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+        }
         QuestionDto questionDto = new QuestionDto();
         BeanUtils.copyProperties(question,questionDto);
         User user =  userMapper.selectByPrimaryKey(question.getCreator());
@@ -135,7 +140,10 @@ public class QuestionService {
                 QuestionExample example = new QuestionExample();
                 example.createCriteria()
                         .andIdEqualTo(question.getId());
-                questionMapper.updateByExampleSelective(updateQuestion, example);
+                int updated =  questionMapper.updateByExampleSelective(updateQuestion, example);
+                if (updated !=1){
+                    throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+                }
             }
     }
 }
